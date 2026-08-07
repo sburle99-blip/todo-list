@@ -20,28 +20,59 @@
   <ul id="taskList"></ul>
 
   <script>
+    // Load saved tasks
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    renderTasks();
+
     function addTask() {
       const taskText = document.getElementById('taskInput').value;
       if (taskText.trim() === "") return;
 
-      const li = document.createElement('li');
-      li.textContent = taskText;
-
-      li.onclick = function() {
-        li.classList.toggle('done');
-      };
-
-      const delBtn = document.createElement('button');
-      delBtn.textContent = "Delete";
-      delBtn.style.marginLeft = "10px";
-      delBtn.onclick = function() {
-        li.remove();
-      };
-
-      li.appendChild(delBtn);
-      document.getElementById('taskList').appendChild(li);
+      tasks.push({ text: taskText, done: false });
+      saveTasks();
+      renderTasks();
 
       document.getElementById('taskInput').value = "";
+    }
+
+    function toggleTask(index) {
+      tasks[index].done = !tasks[index].done;
+      saveTasks();
+      renderTasks();
+    }
+
+    function deleteTask(index) {
+      tasks.splice(index, 1);
+      saveTasks();
+      renderTasks();
+    }
+
+    function saveTasks() {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+      const list = document.getElementById('taskList');
+      list.innerHTML = "";
+
+      tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        li.textContent = task.text;
+        if (task.done) li.classList.add('done');
+
+        li.onclick = () => toggleTask(index);
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = "Delete";
+        delBtn.style.marginLeft = "10px";
+        delBtn.onclick = (event) => {
+          event.stopPropagation();
+          deleteTask(index);
+        };
+
+        li.appendChild(delBtn);
+        list.appendChild(li);
+      });
     }
   </script>
 
